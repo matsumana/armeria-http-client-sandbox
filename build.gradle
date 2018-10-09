@@ -1,0 +1,77 @@
+buildscript {
+    ext {
+        springBootVersion = '2.1.0.M4'
+
+        armeriaVersion = "0.72.0"
+        retrofitVersion = "2.4.0"
+
+        junitVersion = "5.3.1"
+    }
+    repositories {
+        mavenCentral()
+        maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/milestone" }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+group = 'info.matsumana'
+version = '0.0.1-SNAPSHOT'
+
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+[compileJava, compileTestJava]*.options*.encoding = "UTF-8"
+
+repositories {
+    mavenCentral()
+    maven { url "https://repo.spring.io/snapshot" }
+    maven { url "https://repo.spring.io/milestone" }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "com.linecorp.armeria:armeria-bom:${armeriaVersion}"
+        mavenBom "org.junit:junit-bom:${junitVersion}"
+    }
+
+    dependencies {
+        // To override version which Armeria use
+        dependency "org.springframework.boot:spring-boot-starter:${springBootVersion}"
+        dependency "org.springframework.boot:spring-boot-starter-actuator:${springBootVersion}"
+        dependency "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
+
+        dependency "com.squareup.retrofit2:converter-scalars:${retrofitVersion}"
+        dependency "com.squareup.retrofit2:adapter-java8:${retrofitVersion}"
+    }
+}
+
+dependencies {
+    implementation "org.springframework.boot:spring-boot-starter-validation"
+    implementation "com.linecorp.armeria:armeria"
+    implementation "com.linecorp.armeria:armeria-spring-boot-starter"
+    implementation "com.linecorp.armeria:armeria-retrofit2"
+    implementation "com.squareup.retrofit2:converter-scalars"
+    implementation "com.squareup.retrofit2:adapter-java8:"
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+        exclude group: "junit", module: "junit"
+    }
+    testImplementation "org.assertj:assertj-core"
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testImplementation "org.junit.jupiter:junit-jupiter-params"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
